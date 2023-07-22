@@ -15,7 +15,10 @@ app.get('/',(req, res)=>{
     res.send("Api is running");
 }); 
 
-app.use('/api/user',userRoutes)
+app.use('/api/user',userRoutes);
+
+app.user(notFound)
+app.user(errorHandler)
 
 const PORT = process.env.PORT || 3000;
 
