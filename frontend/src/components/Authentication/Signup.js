@@ -4,6 +4,8 @@ import {Button} from "@chakra-ui/button";
 import { FormControl, FormLabel } from "@chakra-ui/form-control";
 import { Input, InputGroup, InputRightElement } from "@chakra-ui/input";
 import { useToast } from "@chakra-ui/toast";
+import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
     const [name, setName] = useState();
@@ -14,6 +16,7 @@ const Signup = () => {
     const [show, setShow] = useState();
     const [loading, setLoading] = useState(false);
     const toast = useToast();
+    const history = useNavigate();
 
     const handleClick = () => {
         setShow(!show);
@@ -64,7 +67,69 @@ const Signup = () => {
         }
     } 
     // Signup button functionality
-    const submitHandler = () => {}
+    const submitHandler = async() => {
+        setLoading(true);
+        if(!name || !email || !password || !confirmpassword)
+        {
+            toast
+            ({
+                title:"Please Fill all the fields",
+                status:"warning",
+                duration:5000,
+                isClosable:true,
+                position:"bottom"
+            });
+            setLoading(false);
+            return;
+        }
+        if(password !== confirmpassword)
+        {
+            toast
+            ({
+                title:"Password does not match",
+                status:"warning",
+                duration:5000,
+                isClosable:true,
+                position:"bottom"
+            });
+            return;
+        }
+        try{
+            const config = {
+                headers:{
+                    "Content-type" : "application/json"
+                },
+            };
+            const { data } = await axios.post(
+                "/api/user", 
+                {name, email, password, pic},
+                config
+            );
+            toast
+            ({
+                title:"Registration Successful",
+                status:"success",
+                duration:5000,
+                isClosable:true,
+                position:"bottom"
+            });
+            localStorage.setItem('userInfo', JSON.stringify(data));
+            setLoading(false);
+            history.push('/chats');
+        }catch(err){
+            toast
+            ({
+                title:"Error Occured",
+                description: err.response.data.message,
+                status:"warning",
+                duration:5000,
+                isClosable:true,
+                position:"bottom"
+            });
+            setLoading(false);
+        }
+    };
+
     return (
         <VStack spacing="5px" color="black">
             
