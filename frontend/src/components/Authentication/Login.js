@@ -55,12 +55,12 @@ const Login = () => {
             });
             localStorage.setItem('userInfo', JSON.stringify(data));
             setLoading(false);
-            history.push('/chats');
+            history('/chat');
         }catch(err){
             toast
             ({
                 title:"Error Occured",
-                description: err.response.data.message,
+                // description: err.response.data.message,
                 status:"warning",
                 duration:5000,
                 isClosable:true,
