@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Avatar, Box, Button, Drawer, DrawerBody, DrawerContent, DrawerHeader, DrawerOverlay, Input, Menu, MenuButton, MenuItem, MenuList, Text, Toast, Tooltip, useToast } from '@chakra-ui/react';
+import { Avatar, Box, Button, Drawer, DrawerBody, DrawerContent, DrawerHeader, DrawerOverlay, Input, Menu, MenuButton, MenuItem, MenuList, Spinner, Text, Toast, Tooltip, useToast } from '@chakra-ui/react';
 import { BellIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { useContext } from 'react';
 import { ChatContext } from '../../Context/ChatProvider';
@@ -15,7 +15,7 @@ const SideDrawer = () => {
   const [searchResult, setSearchResult] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingChat, setLoadingChat] = useState();
-  const { user, setUser } = useContext(ChatContext);
+  const { user, setSelectedChat, chats, setChats } = useContext(ChatContext);
   const history = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const logoutHandler = () => {
@@ -43,6 +43,8 @@ const SideDrawer = () => {
         }
       };
       const { data } = await axios.get(`/api/user?search=${search}`, config);
+      if(!chats.find((c) => c._id === data._id)) 
+      {setChats([data, ...chats]);}
       setLoading(false);
       setSearchResult(data);
     } catch (error) {
@@ -56,7 +58,29 @@ const SideDrawer = () => {
     };
   }
 
-  const accessChat = (userId) => {}
+  const accessChat = async(userId) => {
+    try {
+      setLoadingChat(true);
+      const config = {
+        headers:{
+          "Content-type":"application/json",
+          Authorization:`Bearer ${user.token}`,
+        },
+      };
+      const {data} = await axios.post(`/api/chat`,{userId},config);
+      setSelectedChat(data);
+      setLoadingChat(false);
+      onClose();
+    } catch (error) {
+      toast({
+        title: "Error fetching the chat",
+        status: error.message,
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left"
+      });
+    }
+  }
 
   return (
     <>
@@ -133,6 +157,7 @@ const SideDrawer = () => {
                   />
                 })
               )}
+              {loadingChat && <Spinner ml="auto" display="flex"/>}
             </DrawerBody>
           </DrawerContent>
         </Drawer>
